@@ -25,7 +25,7 @@ impl TaskbarWin {
     pub fn get_position(&self, window_size : tauri::PhysicalSize<u32>) -> tauri::Position {
         let size = window_size.cast::<i32>();
         let x = self.rect.right - 10 - size.width ;
-        let y = self.rect.top + 30- size.height;
+        let y = self.rect.top - size.height;
         println!("{:?}", self.rect);
         tauri::Position::Physical(tauri::PhysicalPosition { x, y })
     }

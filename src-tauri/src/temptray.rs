@@ -4,7 +4,7 @@ use crate::taskbar::TaskbarWin;
 
 
 
-pub fn build_tray(app : AppHandle) -> tauri::Result<(AppHandle)>
+pub fn build_tray(app : AppHandle) -> tauri::Result<AppHandle>
 {
      
     let _ = TrayIconBuilder::new()

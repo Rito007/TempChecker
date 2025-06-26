@@ -21,7 +21,7 @@ pub fn start_temperature_monitoring(app: AppHandle, state: AppState) {
             let results: Vec<ThermalZone> = wmi_con
                 .raw_query("SELECT InstanceName, CurrentTemperature, Active FROM MSAcpi_ThermalZoneTemperature")
                 .unwrap_or_default();
-
+            println!("{:?}", results);
             for temp in results {
                 if temp.active && temp.current_temperature != 2732 {
                     let celsius = (temp.current_temperature as f64 - 2732.0) / 10.0;
@@ -34,13 +34,11 @@ pub fn start_temperature_monitoring(app: AppHandle, state: AppState) {
                         *temperature = celsius as i16;
                     }
 
-                    let _ = app.emit("current_temperature", celsius);
-
                     let limite = {
                         let guard = state.temperature_limit.lock();
                         match guard {
                             Ok(l) => *l,
-                            Err(_) => 40, // fallback
+                            Err(_) => 40,
                         }
                     };
 

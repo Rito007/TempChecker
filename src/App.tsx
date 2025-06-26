@@ -12,31 +12,38 @@ import { Slider } from "@/components/ui/slider";
 
 export default function App() {
   const [temperature, setTemperature] = useState<number | null>(null);
-  const [threshold, setThreshold] = useState(40);
+  const [threshold, setThreshold] = useState<number>(40);
   const [activated, setActivated] = useState(true);
   const botao = useRef(null);
 
   useEffect(() => {
+    // Carrega o limite inicial ao montar
+    invoke<number>("get_limit_command").then(setThreshold);
+
+    // Atualiza a temperatura periodicamente
     const interval = setInterval(() => {
-      invoke<number>("get_temperature").then(setTemperature);
+      invoke<number>("get_temperature_command").then((temp) => setTemperature(temp));
     }, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
   const handleThresholdChange = (value: number[]) => {
-    setThreshold(value[0]);
-    invoke("set_threshold", { value: value[0] });
+    const newLimit = value[0];
+    setThreshold(newLimit);
+    invoke("set_limit_command", { newLimit }); // enviar para backend
   };
 
   const handleOnOff = () => {
     setActivated(!activated);
+    // aqui podes adicionar lógica para pausar o monitor, se necessário
   };
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white p-6 flex items-center justify-center">
       <div className="bg-zinc-800/60 backdrop-blur-md shadow-xl rounded p-6 w-full max-w-sm space-y-6 border border-zinc-700">
-        
+
+        {/* Temperatura Atual */}
         <Card className="bg-zinc-800 rounded-xl shadow-sm border border-zinc-700">
           <CardHeader>
             <CardTitle className="text-base text-white">🌡️ Temperatura</CardTitle>
@@ -48,9 +55,10 @@ export default function App() {
           </CardContent>
         </Card>
 
+        {/* Limite de Temperatura */}
         <Card className="bg-zinc-800 rounded-xl shadow-sm border border-zinc-700">
           <CardHeader>
-            <CardTitle className="text-base text-white">🎚️ Graus de Alerta</CardTitle>
+            <CardTitle className="text-base text-white">🎚️ Limite de Alerta</CardTitle>
           </CardHeader>
           <CardContent>
             <Slider
@@ -67,6 +75,7 @@ export default function App() {
           </CardContent>
         </Card>
 
+        {/* Botão de Ligar/Desligar */}
         <Button
           ref={botao}
           onClick={handleOnOff}
