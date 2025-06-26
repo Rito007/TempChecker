@@ -17,13 +17,13 @@ use crate::commands::*;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub temperature: Arc<Mutex<i16>>,
-    pub temperature_limit: Arc<Mutex<i16>>,
+    pub temperature: Arc<Mutex<f32>>,
+    pub temperature_limit: Arc<Mutex<f32>>,
 }
 
 #[derive(Serialize, Deserialize)]
 struct Config {
-    temperature_limit: i16,
+    temperature_limit: f32,
 }
 
 
@@ -34,17 +34,17 @@ fn config_path() -> std::path::PathBuf {
     path
 }
 
-fn load_temperature_limit() -> i16 {
+fn load_temperature_limit() -> f32 {
     let path = config_path();
     if let Ok(contents) = std::fs::read_to_string(path) {
         if let Ok(config) = serde_json::from_str::<Config>(&contents) {
             return config.temperature_limit;
         }
     }
-    40
+    40.0
 }
 
-fn save_temperature_limit(limit: i16) {
+fn save_temperature_limit(limit: f32) {
     let config = Config { temperature_limit: limit };
     let path = config_path();
     let _ = fs::create_dir_all(path.parent().unwrap());
@@ -65,7 +65,7 @@ pub fn run() {
         .setup(|app| {
             let temp_limit = load_temperature_limit();
             let state = AppState {
-                temperature: Arc::new(Mutex::new(0)),
+                temperature: Arc::new(Mutex::new(0.0)),
                 temperature_limit: Arc::new(Mutex::new(temp_limit)),
             };
             app.manage(state.clone());

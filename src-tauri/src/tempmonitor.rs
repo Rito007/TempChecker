@@ -7,8 +7,11 @@ use crate::{sound::play_notification_sound, AppState};
 
 #[derive(Deserialize, Debug)]
 struct ThermalZone {
+    #[serde(rename = "InstanceName")]
     instance_name: Option<String>,
+    #[serde(rename = "CurrentTemperature")]
     current_temperature: i32,
+    #[serde(rename = "Active")]
     active: bool,
 }
 
@@ -31,18 +34,18 @@ pub fn start_temperature_monitoring(app: AppHandle, state: AppState) {
 
                     {
                         let mut temperature = state.temperature.lock().unwrap();
-                        *temperature = celsius as i16;
+                        *temperature = celsius as f32;
                     }
 
                     let limite = {
                         let guard = state.temperature_limit.lock();
                         match guard {
                             Ok(l) => *l,
-                            Err(_) => 40,
+                            Err(_) => 40.0,
                         }
                     };
 
-                    if celsius as i16 > limite {
+                    if celsius as f32 > limite {
                         play_notification_sound();
 
                         let _ = app.notification()
